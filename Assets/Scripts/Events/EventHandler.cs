@@ -180,10 +180,10 @@ namespace Events
 
         protected virtual void OnGUI()
         {
-            if (this != sm_main)
-            {
-                return;
-            }
+            //if (this != sm_main)
+            //{
+            //    return;
+            //}
 
             #if UNITY_EDITOR
             const float LINE_HEIGHT = 32.0f;

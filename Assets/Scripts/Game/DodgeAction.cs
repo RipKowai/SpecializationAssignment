@@ -5,31 +5,31 @@ using Events;
 public class DodgeAction : EventHandler.GameEvent, IPause
 {
     private Vector3 dodgeDirection;
-    private float dodgeSpeed;
-    private float dodgeDuration;
+    private float dodgeSpeed = 10f;
+    private float dodgeDuration = 0.2f;
     private float startTime;
     private float pauseStartTime;
     private float pausedDuration;
     private bool isDodging;
     private Player player;
 
-    public DodgeAction(Player playerInstance)
+    public DodgeAction(Player playerInstance, Vector3 dodgeDirection)
     {
         player = playerInstance;
         isDodging = false;
+        this.dodgeDirection = dodgeDirection;
+        Debug.Log(dodgeDirection);
     }
 
-    public void StartDodge(Vector3 direction, float speed, float duration)
+    public override void OnBegin(bool bFirstTime)
     {
-        dodgeDirection = direction.normalized; // Normalize direction to ensure consistency
-        dodgeSpeed = speed; // This represents the total distance to travel during the dodge
-        dodgeDuration = duration;
+        base.OnBegin(bFirstTime);
         startTime = Time.time;
         pausedDuration = 0f;
         isDodging = true;
     }
 
-    public void Execute()
+    public override void OnUpdate()
     {
         if (!isDodging || Popup.IsPaused) return;
 
@@ -37,15 +37,27 @@ public class DodgeAction : EventHandler.GameEvent, IPause
         if (elapsedTime < dodgeDuration)
         {
             float progress = elapsedTime / dodgeDuration;
-            Vector3 move = dodgeDirection * dodgeSpeed * progress;
+            Vector3 move = dodgeDirection; // Scale the movement by dodge speed and delta time
             Debug.Log($"Dodge Movement: {move}");
-            player.Controller.Move(move);
+            //player.Controller.Move(move);
+
+            player.transform.position += move * dodgeSpeed * Time.deltaTime;
         }
         else
         {
             isDodging = false;
-            player.EndDodge();
         }
+    }
+
+    public override void OnEnd()
+    {
+        base.OnEnd();
+        isDodging = false;
+    }
+
+    public override bool IsDone()
+    {
+        return !isDodging;
     }
 
     public virtual void Pause()

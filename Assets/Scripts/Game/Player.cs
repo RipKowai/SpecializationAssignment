@@ -68,7 +68,6 @@ namespace Game
             m_weapons = new List<Weapon>(GetComponentsInChildren<Weapon>());
             CurrentWeapon = m_weapons.Count > 0 ? m_weapons[0] : null;
             m_nextWeapon = CurrentWeapon;
-            dodgeAction = new DodgeAction(this);
         }
 
         private void OnDisable()
@@ -111,41 +110,32 @@ namespace Game
             if (Input.GetKey(KeyCode.D)) iRotation++;
             if (Input.GetKey(KeyCode.W) &&
                 Input.GetKey(KeyCode.LeftShift)) iForwardMovement += 3;
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Vector3 dodgeDirection = Vector3.zero;
+                // Get horizontal and vertical input (typically WASD or arrow keys)
+                float horizontalInput = Input.GetAxisRaw("Horizontal");
+                float verticalInput = Input.GetAxisRaw("Vertical");
 
-                if (Input.GetKey(KeyCode.W))
-                {
-                    dodgeDirection = transform.forward; // Dodge forward
-                    PushEvent(new DodgeAction(this));
-                }
-                else if (Input.GetKey(KeyCode.S))
-                {
-                    dodgeDirection = -transform.forward; // Dodge backward
-                    PushEvent(new DodgeAction(this));
-                }
-                else if (Input.GetKey(KeyCode.A))
-                {
-                    dodgeDirection = -transform.right; // Dodge left
-                    PushEvent(new DodgeAction(this));
-                }
-                else if (Input.GetKey(KeyCode.D))
-                {
-                    dodgeDirection = transform.right; // Dodge right
-                    PushEvent(new DodgeAction(this));
-                }
+                // Calculate the dodge direction by combining forward and right based on input
+                // horizontalInput affects the right direction (left/right), and verticalInput affects the forward direction (up/down)
+                Vector3 dodgeDirection = transform.forward * verticalInput + transform.right * horizontalInput;
 
+                // If there is any input (i.e., the dodge direction is not zero)
                 if (dodgeDirection != Vector3.zero)
                 {
-                    float dodgeSpeed = 0.1f; // Replace with the desired speed
-                    float dodgeDuration = 0.2f; // Replace with the desired duration
+                    dodgeDirection.Normalize(); // Ensure it's a unit vector to avoid scaling issues
 
-                    dodgeAction.StartDodge(dodgeDirection, dodgeSpeed, dodgeDuration);
+                    // Trigger the dodge action with the new dodge direction
+                    PushEvent(new DodgeAction(this, dodgeDirection));
                 }
             }
-            // Execute the dodge action if already started
-            dodgeAction.Execute();
+
+
+
+            if (CurrentEvent is DodgeAction)
+                return;
+
             // move forward?
             if (iForwardMovement != 0)
             {
@@ -153,7 +143,7 @@ namespace Game
                 m_controller.Move(vMove);
             }
 
-            // add some gravity to the situation
+            // Add some gravity to the situation
             if (!m_controller.isGrounded)
             {
                 m_controller.Move(Vector3.down * Time.deltaTime * 2.0f);
@@ -188,9 +178,6 @@ namespace Game
             }
         }
 
-        public void EndDodge()
-        {
-            RemoveEvent(dodgeAction);
-        }
+
     }
 }

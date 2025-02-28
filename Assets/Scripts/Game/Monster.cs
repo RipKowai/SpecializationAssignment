@@ -299,12 +299,22 @@ namespace Game
 
         public void Pause()
         {
+            ParticleSystem[] particleSystems = FindObjectsOfType<ParticleSystem>();
+            foreach (ParticleSystem ps in particleSystems)
+            {
+                ps.Pause();
+            }
             animator.speed = 0f;
             Physics.autoSimulation = false;
         }
 
         public void Unpause()
         {
+            ParticleSystem[] particleSystems = FindObjectsOfType<ParticleSystem>();
+            foreach (ParticleSystem ps in particleSystems)
+            {
+                ps.Play();
+            }
             animator.speed = 1f;
             Physics.autoSimulation = true;
         }
