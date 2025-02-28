@@ -1,9 +1,9 @@
 using Game;
 using UnityEngine;
+using Events;
 
-public class DodgeAction
+public class DodgeAction : EventHandler.GameEvent, IPause
 {
-    public bool IsPaused { get; private set; }
     private Vector3 dodgeDirection;
     private float dodgeSpeed;
     private float dodgeDuration;
@@ -16,7 +16,6 @@ public class DodgeAction
     public DodgeAction(Player playerInstance)
     {
         player = playerInstance;
-        IsPaused = false;
         isDodging = false;
     }
 
@@ -27,13 +26,12 @@ public class DodgeAction
         dodgeDuration = duration;
         startTime = Time.time;
         pausedDuration = 0f;
-        IsPaused = false;
         isDodging = true;
     }
 
     public void Execute()
     {
-        if (!isDodging || IsPaused || Popup.IsPaused) return;
+        if (!isDodging || Popup.IsPaused) return;
 
         float elapsedTime = Time.time - startTime - pausedDuration;
         if (elapsedTime < dodgeDuration)
@@ -50,19 +48,17 @@ public class DodgeAction
         }
     }
 
-    public void Pause()
+    public virtual void Pause()
     {
         if (!isDodging) return;
 
-        IsPaused = true;
         pauseStartTime = Time.time;
     }
 
-    public void UnPause()
+    public virtual void Unpause()
     {
         if (!isDodging) return;
 
-        IsPaused = false;
         pausedDuration += Time.time - pauseStartTime;
     }
 }

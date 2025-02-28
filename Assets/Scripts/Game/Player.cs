@@ -118,18 +118,22 @@ namespace Game
                 if (Input.GetKey(KeyCode.W))
                 {
                     dodgeDirection = transform.forward; // Dodge forward
+                    PushEvent(new DodgeAction(this));
                 }
                 else if (Input.GetKey(KeyCode.S))
                 {
                     dodgeDirection = -transform.forward; // Dodge backward
+                    PushEvent(new DodgeAction(this));
                 }
                 else if (Input.GetKey(KeyCode.A))
                 {
                     dodgeDirection = -transform.right; // Dodge left
+                    PushEvent(new DodgeAction(this));
                 }
                 else if (Input.GetKey(KeyCode.D))
                 {
                     dodgeDirection = transform.right; // Dodge right
+                    PushEvent(new DodgeAction(this));
                 }
 
                 if (dodgeDirection != Vector3.zero)
@@ -186,7 +190,7 @@ namespace Game
 
         public void EndDodge()
         {
-            // Implement logic to end the dodge action
+            RemoveEvent(dodgeAction);
         }
     }
 }

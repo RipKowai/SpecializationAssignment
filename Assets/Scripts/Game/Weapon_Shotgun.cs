@@ -138,7 +138,7 @@ namespace Game
             base.OnUpdate();
 
             // fire?
-            bool bAttack = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
+            bool bAttack = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.Mouse0);
             if (bAttack)
             {
                 Player.PushEvent(new FireEvent(this));

@@ -300,11 +300,13 @@ namespace Game
         public void Pause()
         {
             animator.speed = 0f;
+            Physics.autoSimulation = false;
         }
 
         public void Unpause()
         {
             animator.speed = 1f;
+            Physics.autoSimulation = true;
         }
     }
 }
