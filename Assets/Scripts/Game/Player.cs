@@ -8,17 +8,20 @@ namespace Game
     [RequireComponent(typeof(CharacterController))]
     public class Player : EventHandler
     {
-        private Camera                  m_camera;
-        private CharacterController     m_controller;
-        List<Weapon>                    m_weapons = new List<Weapon>();
-        Weapon                          m_currentWeapon;
-        Weapon                          m_nextWeapon;
+        private Camera m_camera;
+        private CharacterController m_controller;
+        List<Weapon> m_weapons = new List<Weapon>();
+        Weapon m_currentWeapon;
+        Weapon m_nextWeapon;
+        private DodgeAction dodgeAction;
 
-        private static Player           sm_instance = null;
+        private static Player sm_instance = null;
 
         #region Properties
 
         public Camera Camera => m_camera;
+
+        public CharacterController Controller => m_controller;
 
         public Weapon CurrentWeapon
         {
@@ -65,6 +68,7 @@ namespace Game
             m_weapons = new List<Weapon>(GetComponentsInChildren<Weapon>());
             CurrentWeapon = m_weapons.Count > 0 ? m_weapons[0] : null;
             m_nextWeapon = CurrentWeapon;
+            dodgeAction = new DodgeAction(this);
         }
 
         private void OnDisable()
@@ -75,7 +79,7 @@ namespace Game
         protected override void Update()
         {
             base.Update();
-            
+
             if (Input.GetKeyDown(KeyCode.Escape))
                 TogglePause();
 
@@ -105,7 +109,39 @@ namespace Game
             if (Input.GetKey(KeyCode.S)) iForwardMovement--;
             if (Input.GetKey(KeyCode.A)) iRotation--;
             if (Input.GetKey(KeyCode.D)) iRotation++;
+            if (Input.GetKey(KeyCode.W) &&
+                Input.GetKey(KeyCode.LeftShift)) iForwardMovement += 3;
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Vector3 dodgeDirection = Vector3.zero;
 
+                if (Input.GetKey(KeyCode.W))
+                {
+                    dodgeDirection = transform.forward; // Dodge forward
+                }
+                else if (Input.GetKey(KeyCode.S))
+                {
+                    dodgeDirection = -transform.forward; // Dodge backward
+                }
+                else if (Input.GetKey(KeyCode.A))
+                {
+                    dodgeDirection = -transform.right; // Dodge left
+                }
+                else if (Input.GetKey(KeyCode.D))
+                {
+                    dodgeDirection = transform.right; // Dodge right
+                }
+
+                if (dodgeDirection != Vector3.zero)
+                {
+                    float dodgeSpeed = 0.1f; // Replace with the desired speed
+                    float dodgeDuration = 0.2f; // Replace with the desired duration
+
+                    dodgeAction.StartDodge(dodgeDirection, dodgeSpeed, dodgeDuration);
+                }
+            }
+            // Execute the dodge action if already started
+            dodgeAction.Execute();
             // move forward?
             if (iForwardMovement != 0)
             {
@@ -146,6 +182,11 @@ namespace Game
             {
                 CurrentWeapon = m_nextWeapon;
             }
+        }
+
+        public void EndDodge()
+        {
+            // Implement logic to end the dodge action
         }
     }
 }
